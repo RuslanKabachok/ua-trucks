@@ -237,7 +237,7 @@ export default function VehicleDetails() {
 
                 {/* Vehicle card header */}
                 <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 mb-6 flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                    <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
                         <Truck size={36} className="text-slate-400" />
                     </div>
                     <div className="flex-1">

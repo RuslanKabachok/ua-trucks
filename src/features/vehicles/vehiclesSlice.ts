@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { mockVehicles, type Document } from './mockData'
+import { mockVehicles, type Document, type Vehicle } from './mockData'
 
 interface AddDocumentPayload {
     vehicleId: number
@@ -9,6 +9,11 @@ interface AddDocumentPayload {
 interface RemoveDocumentPayload {
     vehicleId: number
     documentId: string
+}
+
+interface UpdateGalleryPayload {
+    vehicleId: number
+    gallery: string[]
 }
 
 const vehiclesSlice = createSlice({
@@ -29,8 +34,29 @@ const vehiclesSlice = createSlice({
                 )
             }
         },
+        updateGallery(state, action: PayloadAction<UpdateGalleryPayload>) {
+            const vehicle = state.vehicles.find((v) => v.id === action.payload.vehicleId)
+            if (vehicle) vehicle.gallery = action.payload.gallery
+        },
+        addVehicle(state, action: PayloadAction<Vehicle>) {
+            state.vehicles.push(action.payload)
+        },
+        removeVehicle(state, action: PayloadAction<number>) {
+            state.vehicles = state.vehicles.filter((v) => v.id !== action.payload)
+        },
+        updateNotes(state, action: PayloadAction<{ vehicleId: number; notes: string }>) {
+            const vehicle = state.vehicles.find((v) => v.id === action.payload.vehicleId)
+            if (vehicle) vehicle.notes = action.payload.notes
+        },
     },
 })
 
-export const { addDocument, removeDocument } = vehiclesSlice.actions
+export const {
+    addDocument,
+    removeDocument,
+    updateGallery,
+    addVehicle,
+    removeVehicle,
+    updateNotes,
+} = vehiclesSlice.actions
 export default vehiclesSlice.reducer

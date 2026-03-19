@@ -3,8 +3,9 @@ import type { RootState } from '../app/store'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useDarkMode } from '../hooks/useDarkMode'
-import { ArrowUpDown, ArrowUp, ArrowDown, Truck, Moon, Sun, Circle } from 'lucide-react'
+import { ArrowUpDown, ArrowUp, ArrowDown, Truck, Moon, Sun, Circle, Plus } from 'lucide-react'
 import type { VehicleStatus } from '../features/vehicles/mockData'
+import AddVehicleModal from '../components/modals/AddVehicleModal'
 
 type SortField = 'plate' | 'brand' | 'model' | 'year' | 'color'
 type SortOrder = 'asc' | 'desc'
@@ -38,6 +39,7 @@ export default function VehiclesPage() {
 
     const [sortField, setSortField] = useState<SortField>('plate')
     const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+    const [showAddModal, setShowAddModal] = useState(false)
 
     const handleSort = (field: SortField) => {
         if (field === sortField) {
@@ -51,9 +53,14 @@ export default function VehiclesPage() {
     const sorted = [...vehicles].sort((a, b) => {
         const va = a[sortField]
         const vb = b[sortField]
-        if (va < vb) return sortOrder === 'asc' ? -1 : 1
-        if (va > vb) return sortOrder === 'asc' ? 1 : -1
-        return 0
+
+        if (typeof va === 'number' && typeof vb === 'number') {
+            return sortOrder === 'asc' ? va - vb : vb - va
+        }
+
+        return sortOrder === 'asc'
+            ? String(va).localeCompare(String(vb))
+            : String(vb).localeCompare(String(va))
     })
 
     const SortIcon = ({ field }: { field: SortField }) => {
@@ -66,28 +73,28 @@ export default function VehiclesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+        <div className="min-h-screen transition-colors duration-300 bg-slate-50 dark:bg-slate-950">
             {/* Top bar */}
-            <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 py-4 flex items-center justify-between">
+            <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200 dark:border-slate-800 dark:bg-slate-900">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
+                    <div className="flex items-center justify-center bg-blue-600 w-9 h-9 rounded-xl">
                         <Truck size={18} className="text-white" />
                     </div>
-                    <span className="font-bold text-lg tracking-tight">UA Trucks</span>
+                    <span className="text-lg font-bold tracking-tight">UA Trucks</span>
                 </div>
                 <button
                     onClick={toggleTheme}
-                    className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="flex items-center justify-center transition border w-9 h-9 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                     {isDark ? <Sun size={16} /> : <Moon size={16} />}
                 </button>
             </header>
 
-            <main className="max-w-6xl mx-auto px-8 py-10">
+            <main className="max-w-6xl px-8 py-10 mx-auto">
                 {/* Page header */}
-                <div className="mb-8 flex items-end justify-between">
+                <div className="flex items-end justify-between mb-8">
                     <div>
-                        <p className="text-sm text-slate-400 mb-1">Fleet management</p>
+                        <p className="mb-1 text-sm text-slate-400">Fleet management</p>
                         <h1 className="text-3xl font-bold tracking-tight">Транспортні засоби</h1>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -96,6 +103,12 @@ export default function VehiclesPage() {
                         </span>{' '}
                         одиниць
                     </div>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition bg-blue-600 hover:bg-blue-700 rounded-xl"
+                    >
+                        <Plus size={15} /> Додати
+                    </button>
                 </div>
 
                 {/* Stats row */}
@@ -120,7 +133,7 @@ export default function VehiclesPage() {
                 </div>
 
                 {/* Table */}
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+                <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200 dark:border-slate-800 dark:bg-slate-900">
                     <table className="w-full text-sm">
                         <thead>
                             <tr className="border-b border-slate-100 dark:border-slate-800">
@@ -128,7 +141,7 @@ export default function VehiclesPage() {
                                     <th
                                         key={field}
                                         onClick={() => handleSort(field)}
-                                        className="px-6 py-4 text-left font-medium text-slate-400 cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 transition select-none"
+                                        className="px-6 py-4 font-medium text-left transition cursor-pointer select-none text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                                     >
                                         <div className="flex items-center gap-2">
                                             {label}
@@ -136,7 +149,7 @@ export default function VehiclesPage() {
                                         </div>
                                     </th>
                                 ))}
-                                <th className="px-6 py-4 text-left font-medium text-slate-400">
+                                <th className="px-6 py-4 font-medium text-left text-slate-400">
                                     Статус
                                 </th>
                             </tr>
@@ -182,6 +195,7 @@ export default function VehiclesPage() {
                     </table>
                 </div>
             </main>
+            {showAddModal && <AddVehicleModal onClose={() => setShowAddModal(false)} />}
         </div>
     )
 }
